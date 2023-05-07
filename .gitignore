@@ -7,3 +7,8 @@
 *.log
 *.gz
 *.toc
+Proyecto.aux
+Proyecto.fdb_latexmk
+Proyecto.fls
+Proyecto.log
+Proyecto.synctex.gz

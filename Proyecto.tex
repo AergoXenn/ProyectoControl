@@ -1,15 +1,155 @@
-\documentclass[12pt]{article}
+% Document Type/Class
+\documentclass[12pt,a4paper]{article}
 
-\title{Controlador de Posición de un Carro con Masa}
+% Packages 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{parskip}
 
-\author{Equipo N}
+% Document Options 
+\linespread{1.25}
+\decimalpoint
 
 \begin{document}
+	
+	\begin{titlepage}
+		\begin{center}
+      % Upper margin  
+      \vspace{2cm}
+      
+      % Title -> Large + Bold
+      \huge
+      \textbf{Diseño de un Controlador por el Método del Lugar de las Raíces}
+      
+      % Vertical space
+      \vspace{.5cm}
+      
+      % So
+      \large
+      Proyecto Final
+      
+      % Vertical Space (Tune)
+      \vspace{2cm}
 
-  \maketitle
+      \small
+      \textbf{Zaira Lakeisha Rodríguez González} \break
+      \textbf{Kevin Fernando Becerra Núñez} \break
+      \textbf{Brandon Olaf Contreras Herrera} \break
+      \textbf{Luis Fernando Maravilla Valdivia} \break
+      \textbf{Diego Alejandro Sánchez Kelly} \break
 
-  \section{Quepedo}
+      % Vertical space (Tune)
+      \vspace{1cm}
+      
+      % Institution logo
+      \includegraphics[width=0.4\textwidth, keepaspectratio]{./Resources/UDG.png}
+      
+      % Vertical fill sets the lower margin automatically
+      \vfill
+      
+      % Subject & Institution
+      \large
+      Ingeniería de Control \break
+      Universidad de Guadalajara.
 
-    SALUDOS
+      % Lower margin is automatic
+		\end{center}
+	\end{titlepage}
 
+  % Mandatory pagebreak
+	\pagebreak 
+	
+    \begin{center}
+      \textbf{Abstract} \break
+      Utilizando el sistema de demostración IP01/IP02 de la marca Quanser, se diseñó un controlador de posición 
+      para una planta que consiste en un carro con masa montado en un eje lineal. El diseño del controlador se llevó 
+      por medio del método del lugar de las raíces. 
+    \end{center}
+
+  % Optional pagebreak  
+	%\pagebreak
+	
+    \tableofcontents
+	
+  % Mandatory pagebreak   
+	\pagebreak
+	
+	  \section{Introducción} \label{sec:intro}
+	
+      El diseño del controlador comienza con el modelado matemático de la dinámica del sistema seleccionado. Para 
+      facilitar el trabajo, el fabricante se ha encargado de proporcionar un análisis de la dinámica del sistema, 
+      a continuación, un resumen del mismo. 
+
+      \subsection{Análisis}
+
+        La planta de demostración está compuesta por un carro montado en un eje horizontal de acero, así como un 
+        eje secundario que permite estabilizar el movimiento del sistema.
+
+        En el eje secundario, el carrito implementa un par de engranajes, que alimentan a un encoder rotatorio de 
+        cuadratura o un potenciómetro analógico, según el modelo del dispositivo. 
+
+        El dispositivo, entonces, implementa
+
+	    \subsection{Conceptos}
+	
+	    \subsection{Experimento} \label{subsec: EXP}
+	
+	\pagebreak
+	
+	\section{Desarrollo}
+	
+	\subsection{Teoría Experimental.}
+	
+	%Que se espera del experimento y la teoría detrás de el.
+
+	\subsubsection{ Mediciones.}
+
+	%Resultados preeliminares y demás formas.
+	
+	\subsection{Fuentes de error.}
+	
+	%Justificacion de resultados si se encuentran fuera de lo esperado y explicación si son congruentes.
+	
+	\pagebreak
+
+	\section{Resultados.} 
+	
+	%Exposición de lo obtenido de las mediciones y experimentos.
+	
+	\pagebreak
+	
+	\section{Discusión.}
+	
+	\subsection{Análisis de los resultados.}
+	
+	%Explicación de los resultados y consideraciones sobre los errores y comparación de los resultados contra lo esperado y lós fenómenos reales.
+	
+	\subsection{Aprendizajes.}
+	
+	%Exposición del conocimiento obtenido, sea por parte investigativa o por conjeturas de los resultados que fueron comprobadas o descartadas durante el experimento.
+	
+	\pagebreak
+	
+	\section{Conclusiones.}
+	 
+	%Como la discusión encaja con las concepciones previas. Menciona utilidad de la práctica o experimento y relevancia en cuanto a los conocimientos del curso o carrera.
+	
+	\pagebreak
+	
+	\appendix
+	
+	\section{Apéndice 1}
+	
+	%Códigos, plots, imágenes, etc.
+	
+	\section{Apéndice 2}
+	
+	%Códigos, plots, imágenes, etc.
+	
 \end{document}
