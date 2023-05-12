@@ -5,12 +5,17 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
+\usepackage{epstopdf}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{siunitx}
 \usepackage{parskip}
+\usepackage{multicol}
+
+\newcommand{\expnum}[2]{{#1}\mathrm{e}{#2}}
+\newcommand{\eee}[2]{{#1}\times 10^{#2}}
 
 % Document Options 
 \linespread{1.25}
@@ -69,7 +74,7 @@
       \textbf{Abstract} \break
       Utilizando el sistema de demostración IP01/IP02 de la marca Quanser, se diseñó un controlador de posición 
       para una planta que consiste en un carro con masa montado en un eje lineal. El diseño del controlador se llevó 
-      por medio del método del lugar de las raíces. 
+      por medio del método del luga geométrico de las raíces o LGR. 
     \end{center}
 
   % Optional pagebreak  
@@ -79,14 +84,14 @@
 	
   % Mandatory pagebreak   
 	\pagebreak
-	
+
 	  \section{Introducción} \label{sec:intro}
 	
       El diseño del controlador comienza con el modelado matemático de la dinámica del sistema seleccionado. Para 
       facilitar el trabajo, el fabricante se ha encargado de proporcionar un análisis de la dinámica del sistema, 
       a continuación, un resumen del mismo. 
 
-      \subsection{Análisis}
+      \subsection{Descripción de la Planta}
 
         La planta de demostración está compuesta por un carro montado en un eje horizontal de acero, así como un 
         eje secundario que permite estabilizar el movimiento del sistema.
@@ -94,62 +99,164 @@
         En el eje secundario, el carrito implementa un par de engranajes, que alimentan a un encoder rotatorio de 
         cuadratura o un potenciómetro analógico, según el modelo del dispositivo. 
 
-        El dispositivo, entonces, implementa
+        El dispositivo, entonces, permite conocer la posición del carrito por medio de 2 diferentes mecanismos, 
+        por extensión, esto también permite conocer la velocidad y aceleración del mismo. La Figura~\ref{fig:intro:planta}
+        muestra el dispositivo, cortesía del fabricante.
 
-	    \subsection{Conceptos}
-	
-	    \subsection{Experimento} \label{subsec: EXP}
-	
+        \vfill
+
+        \begin{figure}[h]
+          \centering
+          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP01.png}
+          \caption{Planta}
+          \label{fig:intro:planta}
+        \end{figure}
+
+    \pagebreak
+
+	  \section{Modelado}
+
+      El modelado del dispositivo en su mayoría es realizado por el fabricante en el manual de usuario, por lo que 
+      a continuación se presenta un resumen de los cálculos a partir de los cuales se derivan las funciones de 
+      transferencia de lazo abierto y lazo cerrado. 
+
+      \subsection{Lazo Abierto}  
+
+        \subsubsection{Función de Transferencia}
+
+        El fabricante obtiene 2 modelos matemáticos de la dinámica del sistema, por un lado, un modelo simplificado, 
+        como ejercicio, y posteriormente un modelo más completo, óptimo para el diseño de un controlador. 
+        
+        La función de transferencia de lazo abierto para el modelo complejo es la siguiente, 
+        
+        \begin{equation}
+          G\left(s\right) = \frac{r_{mp} \eta_{g} K_{g} \eta_{m} K_{t}}{s^{2}\left(R_{m} M r_{mp}^{2} \eta_{g} K_{g}^{2} J_{m}\right) + 
+          s\left(\eta_{g} K_{g}^{2} \eta_{m} K_{t} K_{m} + B_{eq} R_{m} r_{mp}^{2}\right)}
+          \label{eq:modeling:plantTf}
+        \end{equation}
+
+        La sustitución de los parámetros físicos de la planta en la Ecuación~\ref{eq:modeling:openLoopTf} produce la
+        siguiente función, 
+        
+        \begin{equation}
+          G\left(s\right) = \frac{\expnum{1.8063}{-4}}{s^{2}\left(\expnum{6.8472}{-5}\right) + s\left(\expnum{1.2605}{-3}\right)}
+          \label{eq:modeling:openLoopTf}
+        \end{equation}
+
+        que es el punto de partida para el diseño del controlador. Sin embargo, primero es necesario caracterizar
+        el sistema. 
+
+        \subsubsection{Polos y Ceros}
+
+        La retroalimentación negativa no altera las propiedades de los polos y ceros del sistema, asimismo, no 
+        incrementa o reduce su cantidad. Por lo tanto, el análisis de su ubicación se puede realizar antes o después de
+        aplicar retroalimentación negativa. 
+
+        De la función de transferencia de lazo abierto, se obtiene
+
+          \begin{equation*}
+            \begin{aligned}
+              s^{2}\left(\expnum{6.8472}{-5}\right) + s\left(\expnum{1.2605}{-3}\right) &= 0 \\
+              s\left(\expnum{6.8472}{-5}\right) &= -\expnum{1.2605}{-3} \\
+              s &= -\frac{\expnum{1.2605}{-3}}{\expnum{6.8472}{-5}} \\
+            \end{aligned}
+            \label{eq*:modeling:roots}
+          \end{equation*}    
+
+          donde \(s \rightarrow \left\{0, -18.4092\right\}\).
+
+          Realizando una gráfica del lugar geométrico de las raíces, es posible confirmar la locación de los polos, 
+          como lo muestra la Figura~\ref{fig:modeling:rlocus_open}.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/OpenLoopLoci.jpg}
+            \caption{Lugar Geométrico de las Raíces, Lazo Abierto}
+            \label{fig:modeling:rlocus_open}
+          \end{figure}
+
+      \subsection{Lazo Cerrado}    
+      
+        Se aplica una retroalimentación negativa a la función de transferencia de la Ecuación~\ref{eq:modeling:openLoopTf}.
+
+        Esto se realiza por medio del comando \verb|feedback(tf, 1, -1)|, el cual genera un lazo cerrado con ganancia 
+        unitaria negativa. 
+
+        La función de transferencia de lazo cerrado, entonces,
+
+        \begin{equation}
+          G\left(s\right) = \frac{\expnum{1.806}{-4}}{s^{2}\left(\expnum{6.847}{-5}\right) + s\left(\expnum{1.26}{-3}\right) + \expnum{1.806}{-4}}
+          \label{eq:model:closedLoopTf}
+        \end{equation}
+
+      \subsubsection{Polos y Ceros de Lazo Cerrado}
+        	
+        Una vez más, por consistencia, comprobamos la locación de los polos y ceros del sistema.
+
+        Por inspección, es evidente que no existe ningún polo ni cero extra, lo cual es consistente con la 
+        retroalimentación antes aplicada. 
+
+        Así, lo establecido en la Ecuación~\ref{eq*:modeling:roots} debe mantenerse, y, como se puede ver en la 
+        Figura~\ref{fig:modeling:closedLoopLoci}, el lugar geométrico de las raíces no se modifica. 
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/ClosedLoopLoci.jpg}
+          \caption{Lugar Geométrico de las Raíces, Lazo Cerrado.}
+          \label{fig:modeling:closedLoopLoci}
+        \end{figure}
+
+    \pagebreak
+
+    \section{Análisis de Respuesta en el Tiempo}
+
+      Previo a comenzar el diseño del controlador, es necesario conocer la respuesta del sistema a diferentes 
+      estímulos o perturbaciones. Esto es relevante ya que nos permitirá determinar el tipo de controlador 
+      y sus parámetros de diseño. 
+
+      El diseño contempla el uso del lugar geométrico de las raíces para diseñar un compensador de adelanto, por lo 
+      tanto, el análisis de la respuesta se realiza en el dominio del tiempo y no de la frecuencia. 
+
+      Entonces, el primer paso es conocer la respuesta transitoria del sistema, comenzando por la respuesta 
+      a una función escalón. 
+
+      \subsection{Escalón Unitario}
+        
+        Utilizando el comando \verb|step| en MATLAB, es posible obtener la respuesta en el tiempo del sistema 
+        a un estímulo escalón.   
+
+        La Figura~\ref{fig:response:closedLoopStep} muestra la respuesta en lazo cerrado del sistema a un 
+        estímulo constante de amplitud 1. Esta respuesta es característica de un sistema de segundo orden
+
+        Como puede observarse, la respuesta del sistema es lenta. Extrayendo los valores de la misma gráfica, 
+        el tiempo de subida es de \(15.2\si{\second}\), mientras que el tiempo de asentamiento es 
+        de \(27.1\si{\second}\).
+
+        \begin{figure}%[b]
+          \centering
+          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/ClosedLoopStep.jpg}
+          \caption{Respuesta Escalón Unitario, Lazo Cerrado}
+          \label{fig:response:closedLoopStep}
+        \end{figure}
+
+        \subsubsection{Análisis Transitorio}
+
+        \subsubsection{Análisis en Estado Estacionario}
+          
+      \subsection{Rampa}
+
+        
+      
+        
+
 	\pagebreak
 	
 	\section{Desarrollo}
-	
-	\subsection{Teoría Experimental.}
-	
-	%Que se espera del experimento y la teoría detrás de el.
 
-	\subsubsection{ Mediciones.}
+    \subsection{}
+	
+  $$ -\frac{\log (0.08)}{\sqrt{\pi ^2+\log ^2(0.08)}} $$
 
-	%Resultados preeliminares y demás formas.
-	
-	\subsection{Fuentes de error.}
-	
-	%Justificacion de resultados si se encuentran fuera de lo esperado y explicación si son congruentes.
-	
-	\pagebreak
-
-	\section{Resultados.} 
-	
-	%Exposición de lo obtenido de las mediciones y experimentos.
-	
-	\pagebreak
-	
-	\section{Discusión.}
-	
-	\subsection{Análisis de los resultados.}
-	
-	%Explicación de los resultados y consideraciones sobre los errores y comparación de los resultados contra lo esperado y lós fenómenos reales.
-	
-	\subsection{Aprendizajes.}
-	
-	%Exposición del conocimiento obtenido, sea por parte investigativa o por conjeturas de los resultados que fueron comprobadas o descartadas durante el experimento.
-	
-	\pagebreak
-	
-	\section{Conclusiones.}
-	 
-	%Como la discusión encaja con las concepciones previas. Menciona utilidad de la práctica o experimento y relevancia en cuanto a los conocimientos del curso o carrera.
-	
-	\pagebreak
-	
-	\appendix
-	
-	\section{Apéndice 1}
-	
-	%Códigos, plots, imágenes, etc.
-	
-	\section{Apéndice 2}
-	
-	%Códigos, plots, imágenes, etc.
+  $$ \frac{1.8069}{10^4 \left(\frac{6.8473 s^2}{10^5}+\frac{8.0973 s}{10^4}+\frac{4.5081}{10^4}\right)} $$
 	
 \end{document}
