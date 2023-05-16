@@ -135,16 +135,23 @@
           \label{eq:modeling:plantTf}
         \end{equation}
 
-        La sustitución de los parámetros físicos de la planta en la Ecuación~\ref{eq:modeling:openLoopTf} produce la
+        La sustitución de los parámetros físicos de la planta en la Ecuación~\ref{eq:modeling:plantTf} produce la
         siguiente función, 
         
         \begin{equation}
           G\left(s\right) = \frac{\expnum{1.8063}{-4}}{s^{2}\left(\expnum{6.8472}{-5}\right) + s\left(\expnum{1.2605}{-3}\right)}
-          \label{eq:modeling:openLoopTf}
+          \label{eq:modeling:openLoopTf_nosimp}
         \end{equation}
 
-        que es el punto de partida para el diseño del controlador. Sin embargo, primero es necesario caracterizar
-        el sistema. 
+        Esto se puede simplificar posteriormente, tal que,  
+        
+        \begin{equation}
+          G\left(s\right) = \frac{2.638}{s^{2} + s\left(18.409\right)}
+          \label{eq:modeling:openloopTf_simpd}
+        \end{equation}
+
+        La anterior operación no modifica la ubicación de los polos y ceros del controlador, sin embargo, 
+        si permite que los cálculos posteriores sean más sencillos. 
 
         \subsubsection{Polos y Ceros}
 
@@ -156,28 +163,28 @@
 
           \begin{equation*}
             \begin{aligned}
-              s^{2}\left(\expnum{6.8472}{-5}\right) + s\left(\expnum{1.2605}{-3}\right) &= 0 \\
-              s\left(\expnum{6.8472}{-5}\right) &= -\expnum{1.2605}{-3} \\
-              s &= -\frac{\expnum{1.2605}{-3}}{\expnum{6.8472}{-5}} \\
+              s^{2}+ s\left(18.4092\right) &= 0 \\
+              s^{2} &= -s\left(18.4092\right)\\
             \end{aligned}
             \label{eq*:modeling:roots}
           \end{equation*}    
 
-          donde \(s \rightarrow \left\{0, -18.4092\right\}\).
+          de lo anterior, \(s \rightarrow \left\{0, -18.4092\right\}\) en el caso de los polos. 
 
-          Realizando una gráfica del lugar geométrico de las raíces, es posible confirmar la locación de los polos, 
-          como lo muestra la Figura~\ref{fig:modeling:rlocus_open}.
+          Asimismo, observando el numerador de la función original, es evidente que no existen ceros. 
+
+          Es posible verificar la ubicación de los polos y ceros en la Figura~\ref{fig:modeling:pzmap_open}
 
           \begin{figure}
             \centering
-            \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/OpenLoopLoci.jpg}
-            \caption{Lugar Geométrico de las Raíces, Lazo Abierto}
-            \label{fig:modeling:rlocus_open}
+            \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/pzmap_ol.png}
+            \caption{Mapa de polos y ceros, Lazo Abierto}
+            \label{fig:modeling:pzmap_open}
           \end{figure}
 
       \subsection{Lazo Cerrado}    
       
-        Se aplica una retroalimentación negativa a la función de transferencia de la Ecuación~\ref{eq:modeling:openLoopTf}.
+        Se aplica una retroalimentación negativa a la función de transferencia de la Ecuación~\ref{eq:modeling:openloopTf_simpd}.
 
         Esto se realiza por medio del comando \verb|feedback(tf, 1, -1)|, el cual genera un lazo cerrado con ganancia 
         unitaria negativa. 
@@ -185,25 +192,23 @@
         La función de transferencia de lazo cerrado, entonces,
 
         \begin{equation}
-          G\left(s\right) = \frac{\expnum{1.806}{-4}}{s^{2}\left(\expnum{6.847}{-5}\right) + s\left(\expnum{1.26}{-3}\right) + \expnum{1.806}{-4}}
+          G\left(s\right) = \frac{2.638}{s^{2} + s\left(18.4092\right) + 2.638}
           \label{eq:model:closedLoopTf}
         \end{equation}
 
-      \subsubsection{Polos y Ceros de Lazo Cerrado}
+      \subsubsection{Polos y Ceros}
         	
-        Una vez más, por consistencia, comprobamos la locación de los polos y ceros del sistema.
+        Por consistencia, comprobamos la locación de los polos y ceros del sistema, que no deben modificarse
+        debido a la retroalimentación aplicada al sistema.
 
-        Por inspección, es evidente que no existe ningún polo ni cero extra, lo cual es consistente con la 
-        retroalimentación antes aplicada. 
-
-        Así, lo establecido en la Ecuación~\ref{eq*:modeling:roots} debe mantenerse, y, como se puede ver en la 
-        Figura~\ref{fig:modeling:closedLoopLoci}, el lugar geométrico de las raíces no se modifica. 
+        Por lo tanto, lo establecido en la Sección~\ref{eq*:modeling:roots} debe mantenerse, y, como se puede ver en la 
+        Figura~\ref{fig:modeling:pzmap_closed}, el lugar geométrico de las raíces no se modifica. 
 
         \begin{figure}
           \centering
-          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/ClosedLoopLoci.jpg}
-          \caption{Lugar Geométrico de las Raíces, Lazo Cerrado.}
-          \label{fig:modeling:closedLoopLoci}
+          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/pzmap_cl_nc.png}
+          \caption{Mapa de Polos y Ceros, Lazo Cerrado.}
+          \label{fig:modeling:pzmap_closed}
         \end{figure}
 
     \pagebreak
@@ -232,23 +237,99 @@
         el tiempo de subida es de \(15.2\si{\second}\), mientras que el tiempo de asentamiento es 
         de \(27.1\si{\second}\).
 
-        \begin{figure}%[b]
+        \begin{figure}
           \centering
-          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/ClosedLoopStep.jpg}
+          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/cltf_step_nc.png}
           \caption{Respuesta Escalón Unitario, Lazo Cerrado}
           \label{fig:response:closedLoopStep}
         \end{figure}
 
-        \subsubsection{Análisis Transitorio}
+    \section{Diseño del Controlador}
 
-        \subsubsection{Análisis en Estado Estacionario}
-          
-      \subsection{Rampa}
+        A continuación se proporciona contexto sobre el proceso, fórmulas y técnicas de diseño utilizadas para 
+        el diseño final del controlador.
 
+        \subsection{Marco Teórico}
+
+        La teoría de control proporciona una serie de herramientas para moldear la respuesta de un sistema según 
+        lo requerido por el diseñador. 
+
+        Para un sistema de segundo orden, (ver Ecuación~\ref{eq:model:closedLoopTf}), la forma normal del sistema 
+        tiene las siguiente ecuación estándar, 
+
+        \begin{equation}
+          G\left(s\right) = \frac{K_{dc}\omega_{n}^{2}}{s^{2} + 2\zeta\omega_{n}s + \omega_{n}^{2}}
+          \label{eq:design:2ndorder_std}
+        \end{equation}
+
+        con polinomio característico, 
+
+        \begin{equation}
+          s^{2} + 2\zeta\omega_{n}s + \omega_{n}^{2}
+          \label{eq:design:2ndorder_std_charact}
+        \end{equation}
+
+        También sabemos que los parámetros de sobredisparo y tiempo pico se pueden calcular con las siguientes ecuaciones, 
+        respectivamente, 
+
+        \begin{equation}
+          P_{ovsht} = 100\exp\left(-\frac{\zeta\pi}{\sqrt[2]{1-\zeta^{2}}}\right)
+          \label{eq:design:overshoot_prcntg}
+        \end{equation}
+
+        \begin{equation}
+          t_{p} = \frac{\pi}{\omega_{n}\sqrt{1-\zeta^{2}}}
+          \label{eq:design:peak_time}
+        \end{equation}
+
+        \subsection{Parámetros de diseño}
+
+        Se proponen los siguientes parámetros de diseño,
+
+        \begin{description}
+          \item[Overshoot] El sistema debe contar con un porcentaje de \emph{overshoot} de máximo un 7\%. 
+          \item[Peak Time] El sistema debe alcanzar su punto pico en 1 segundo. 
+        \end{description}
         
-      
-        
+         Desde \ref{eq:design:overshoot_prcntg}, 
 
+        \begin{equation}
+        \zeta = \frac{-\ln\left(P_{ovsht}\right)}{\sqrt{\pi^{2} + \ln^{2}\left(P_{ovsht}\right)}}
+        \end{equation}
+
+        y, desde, \ref{eq:design:peak_time}, 
+
+        \begin{equation}
+          \omega_{n} = \frac{\pi}{t_{p}\sqrt{1-\zeta^{2}}}
+        \end{equation}
+        
+        entonces, calculando los valores de $ \zeta $ y de $ \omega_{n} $, obtenemos, 
+
+        \begin{equation*}
+          \begin{aligned}
+            \zeta &= \frac{-\ln\left(0.08\right)}{\sqrt{\pi^{2} + \ln^{2}\left(0.08\right)}} \\
+            \zeta &= 0.64608 \\
+          \end{aligned}
+        \end{equation*}
+
+        y, 
+
+        \begin{equation*}
+          \begin{aligned}
+            \omega_{n} &= \frac{\pi}{0.11\sqrt{1-\zeta^{2}}} \\ 
+            \omega_{n} &= 37.42218 \\
+          \end{aligned}
+        \end{equation*}
+        
+        Despejando $ S $ en la Ecuación~\ref{eq:design:2ndorder_std_charact}, se obtiene que, 
+
+        \begin{equation}
+          s = -\zeta\omega_{n} \pm \omega_{n}\sqrt{1 - \zeta^{2}}j
+          \label{eq:design:charact_sval}
+        \end{equation}
+
+
+        \label{eq:design:charact_subs}
 	\pagebreak
 	
 	\section{Desarrollo}
