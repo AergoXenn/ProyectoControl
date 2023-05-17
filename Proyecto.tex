@@ -12,6 +12,7 @@
 \usepackage{graphicx}
 \usepackage{siunitx}
 \usepackage{parskip}
+\usepackage{gensymb}
 \usepackage{multicol}
 
 \newcommand{\expnum}[2]{{#1}\mathrm{e}{#2}}
@@ -215,41 +216,52 @@
 
     \section{Análisis de Respuesta en el Tiempo}
 
-      Previo a comenzar el diseño del controlador, es necesario conocer la respuesta del sistema a diferentes 
-      estímulos o perturbaciones. Esto es relevante ya que nos permitirá determinar el tipo de controlador 
-      y sus parámetros de diseño. 
+    Previo a comenzar el diseño del controlador, es necesario conocer la respuesta del sistema a diferentes 
+    estímulos o perturbaciones. Esto es relevante ya que nos permitirá determinar el tipo de controlador 
+    y sus parámetros de diseño. 
 
-      El diseño contempla el uso del lugar geométrico de las raíces para diseñar un compensador de adelanto, por lo 
-      tanto, el análisis de la respuesta se realiza en el dominio del tiempo y no de la frecuencia. 
+    El diseño contempla el uso del lugar geométrico de las raíces para diseñar un compensador de adelanto, por lo 
+    tanto, el análisis de la respuesta se realiza en el dominio del tiempo y no de la frecuencia. 
 
-      Entonces, el primer paso es conocer la respuesta transitoria del sistema, comenzando por la respuesta 
-      a una función escalón. 
+    Entonces, el primer paso es conocer la respuesta transitoria del sistema, comenzando por la respuesta 
+    a una función escalón. 
 
-      \subsection{Escalón Unitario}
-        
-        Utilizando el comando \verb|step| en MATLAB, es posible obtener la respuesta en el tiempo del sistema 
-        a un estímulo escalón.   
+    \subsection{Escalón Unitario}
+      
+      Utilizando el comando \verb|step| en MATLAB, es posible obtener la respuesta en el tiempo del sistema 
+      a un estímulo escalón.   
 
-        La Figura~\ref{fig:response:closedLoopStep} muestra la respuesta en lazo cerrado del sistema a un 
-        estímulo constante de amplitud 1. Esta respuesta es característica de un sistema de segundo orden
+      La Figura~\ref{fig:response:closedLoopStep} muestra la respuesta en lazo cerrado del sistema a un 
+      estímulo constante de amplitud 1. Esta respuesta es característica de un sistema de segundo orden
 
-        Como puede observarse, la respuesta del sistema es lenta. Extrayendo los valores de la misma gráfica, 
-        el tiempo de subida es de \(15.2\si{\second}\), mientras que el tiempo de asentamiento es 
-        de \(27.1\si{\second}\).
+      Como puede observarse, la respuesta del sistema es lenta. Extrayendo los valores de la misma gráfica, 
+      el tiempo de subida es de \(15.2\si{\second}\), mientras que el tiempo de asentamiento es 
+      de \(27.1\si{\second}\).
 
-        \begin{figure}
-          \centering
-          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/cltf_step_nc.png}
-          \caption{Respuesta Escalón Unitario, Lazo Cerrado}
-          \label{fig:response:closedLoopStep}
-        \end{figure}
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/cltf_step_nc.png}
+        \caption{Respuesta Escalón Unitario, Lazo Cerrado}
+        \label{fig:response:closedLoopStep}
+      \end{figure}
 
-    \section{Diseño del Controlador}
+  \pagebreak
 
-        A continuación se proporciona contexto sobre el proceso, fórmulas y técnicas de diseño utilizadas para 
-        el diseño final del controlador.
+  \section{Diseño del Compensador}
 
-        \subsection{Marco Teórico}
+      Un compensador de adelanto tiene la intención de cambiar la respuesta del sistema introduciendo un polo y un cero. Esto 
+      tiene el efecto de mover el LGR para hacerlos pasar por una serie de polos deseados. 
+
+      Posteriormente, se sintoniza el controlador seleccionando la ganancia adecuada para la cuál la condición de ángulo 
+      se cumple. 
+
+      Los compensadores, ya sean de adelanto, retardo o adelanto-retardo, no son controladores propiamente, sin embargo, permiten
+      implementar acciones de control de forma mucho más sencilla que, por ejemplo, un controlador PID. 
+
+      A continuación se proporciona contexto sobre el proceso, fórmulas y técnicas de diseño utilizadas para 
+      el diseño final del controlador.
+
+      \subsection{Marco Teórico}
 
         La teoría de control proporciona una serie de herramientas para moldear la respuesta de un sistema según 
         lo requerido por el diseñador. 
@@ -273,7 +285,7 @@
         respectivamente, 
 
         \begin{equation}
-          P_{ovsht} = 100\exp\left(-\frac{\zeta\pi}{\sqrt[2]{1-\zeta^{2}}}\right)
+          P_{osht} = 100\exp\left(-\frac{\zeta\pi}{\sqrt[2]{1-\zeta^{2}}}\right)
           \label{eq:design:overshoot_prcntg}
         \end{equation}
 
@@ -282,19 +294,21 @@
           \label{eq:design:peak_time}
         \end{equation}
 
-        \subsection{Parámetros de diseño}
+      \subsection{Parámetros de diseño}
 
         Se proponen los siguientes parámetros de diseño,
 
         \begin{description}
-          \item[Overshoot] El sistema debe contar con un porcentaje de \emph{overshoot} de máximo un 7\%. 
-          \item[Peak Time] El sistema debe alcanzar su punto pico en 1 segundo. 
+          \item[Overshoot] El sistema debe contar con un porcentaje de sobredisparo de máximo un 7\%. 
+          \item[Peak Time] El sistema debe alcanzar su punto pico en $ 110\si{\milli\second} $. 
         \end{description}
-        
-         Desde \ref{eq:design:overshoot_prcntg}, 
+      
+      \subsection{Ubicación de los Polos Deseados}
+
+        Desde \ref{eq:design:overshoot_prcntg}, 
 
         \begin{equation}
-        \zeta = \frac{-\ln\left(P_{ovsht}\right)}{\sqrt{\pi^{2} + \ln^{2}\left(P_{ovsht}\right)}}
+        \zeta = \frac{-\ln\left(P_{osht}\right)}{\sqrt{\pi^{2} + \ln^{2}\left(P_{ovsht}\right)}}
         \end{equation}
 
         y, desde, \ref{eq:design:peak_time}, 
@@ -328,16 +342,160 @@
           \label{eq:design:charact_sval}
         \end{equation}
 
+        y, posteriormente, sustituyendo los valores de $ \zeta $ y de $ \omega_{n} $ calculados anteriormente, 
+        obtenemos,
 
-        \label{eq:design:charact_subs}
+        \begin{equation}
+          \centering
+          \begin{aligned}
+            \hat{s} &= \left(-0.64608\right) \left(37.42218\right) \pm \left(37.42218\sqrt{1-0.64608^{2}}\right) \\
+            \hat{s} &= -24.17772 \pm 32.69379j
+          \end{aligned}
+        \end{equation}
+
+        Que es la combinación compleja conjugada de los polos deseados para el compensador de adelanto. 
+
+      \subsection{Condición de Ángulo}
+
+        Conociendo la ubiación deseada del polo, el primer paso es entonces verificar si este ya se encuentra en 
+        el lugar geométrico de las raíces, lo cual requiere de aplicar la condición de ángulo. 
+
+        La condición de ángulo establece que, 
+
+        \begin{equation}
+          \Sigma_{\angle_{poles}} + \Sigma_{\angle_{zeros}} = 180\degree
+          \label{eq:design:angle_condition} 
+        \end{equation}
+
+        Calculando,
+        
+        \[ \alpha_{1} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772}\right) \]
+
+        y 
+
+        \[ \alpha_{2} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772 - 18.40923}\right) \]
+
+        lo cual resulta en \( \alpha_{1} = 126.48367\degree \) y \( \alpha_{2} = 100.00627 \).
+
+        Podemos calcular el ángulo de deficiencias, 
+
+        \begin{equation}
+          \phi = 180\degree - \alpha_{1} - \alpha_{2} 
+        \end{equation}
+
+        entonces, 
+
+        \[ \phi =  180\degree - 126.48367\degree - 100.00627\degree \]
+
+        por lo tanto, \( \phi = 46.48994\degree \).
+
+        Este ángulo, \( \phi \), corresponde al ángulo que deberá proporcionar el compensador para lograr que 
+        el lugar geométrico de las raíces pase por el polo deseado. 
+
+      \subsection{Polos y ceros del compensador}
+        \label{subsec:polezero}
+
+        Calulamos la sintonización, 
+
+        \[ \dfrac{\phi}{2} = 23.24497\degree \]
+
+        por lo tanto, 
+
+        \[ \alpha_{3} = \dfrac{\alpha_{1}}{2} = \dfrac{126.48367}{2}  \]
+
+        que es, \( \alpha_{3} = 63.2418 \). También, 
+
+        \[ \alpha_{4} = \alpha_{3} - \dfrac{\phi}{2} = 63.2418 - \dfrac{46.4894}{2} \], 
+        
+        que es \( 39.9968 \). 
+
+        Entonces, 
+
+        \[ \tan\left(39.9968\right)\dfrac{32.6937}{d} \]
+
+        Calculando \( d \), 
+
+        \[ d = \dfrac{32.6937}{\tan\left(39.9968\right)} = 38.9672 \]
+
+        A partir de lo anterior, es posible calcular el polo compensado, 
+        
+        \[ \dfrac{1}{\alpha } = 38.9672 + 24.1777 = 69.1449 \]
+
+        similarmente, podemos calcular el cero compensado, 
+
+        \[ \tan\left(3.5131 \right) = \dfrac{y}{32.69379} \]
+
+        despejando, 
+
+        \[ y = 32.6937 \cdot \tan\left(3.5131\right) = 2.0071 \]
+
+        Finalmente, 
+
+        \[ \dfrac{1}{T} = 24.1777 + 2.0071 = 26.1849\]
+
+        A partir de esto, es posible proceder con la implementación del controlador y la obtención de la función 
+        de transferencia final. 
+
 	\pagebreak
 	
-	\section{Desarrollo}
-
-    \subsection{}
+	\section{Desarrollo del Compensador de Adelanto}
 	
-  $$ -\frac{\log (0.08)}{\sqrt{\pi ^2+\log ^2(0.08)}} $$
+    La forma estándar de un compensador de adelanto es la siguiente, 
 
-  $$ \frac{1.8069}{10^4 \left(\frac{6.8473 s^2}{10^5}+\frac{8.0973 s}{10^4}+\frac{4.5081}{10^4}\right)} $$
-	
+    \begin{equation}  
+      G_{c}\left(s\right) = K_{c}\dfrac{s+\dfrac{1}{T}}{s + \dfrac{1}{\alpha T}}
+      \label{eq:devel:leadcomp}
+    \end{equation}
+
+    donde \( \alpha \) debe encontrarse en la región \( 0 < \alpha < 1 \). 
+
+    Según lo establecido en la Sección~\ref{subsec:polezero}, sustituímos en la 
+    Ecuación~\ref{eq:devel:leadcomp} para obtener, 
+
+    \[ G_{c}\left(s\right) = K_{c}\dfrac{s + 26.18491}{s + 63.1449}\]
+        
+    \subsection{Ganancia del Compensador}
+
+      Desde, 
+
+      \begin{equation}
+        0 = 1 + G_{c}\left(s\right)G\left(s\right)
+        \label{eq:devel:compdsys_formula}
+      \end{equation}
+
+      sustituímos, 
+
+      \[ 1 + K_{c}\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right) = 0 \]
+
+      y, posteriormente, evaluamos en \( \hat{s} \), 
+
+      \[ K_{c}\left|\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right)\right| = 1 \]
+
+      tal que, 
+
+      \[ K_{c} = 794.39503 \]
+
+      Al proceso anterior se le conoce como la \emph{condición de magnitud}. 
+
+    \subsection{Función de Transferencia Compensada} 
+
+      Finalmente, 
+
+      \begin{equation*}
+        G_{c}\left(s\right)G_{s}\left(s\right) = 794.39503\frac{2.63891s + 69.0996}{s^{3} + 81.5542s^{2} + 1162.45s}
+      \end{equation*}
+
+      Que es el sistema final compensado. 
+
+  \pagebreak
+
+  \section{Análisis del Controlador}
+
+    Una vez obtenida la función de transferencia de la planta en serie con el controlador, en serie, es posible determinar 
+    la respuesta del sistema completo y verificar que se ha modificado a la respuesta deseada. 
+
+    Para ello, es de nuestro interés comparar las respuestas a los posibles estímulos al sistema, 
+
+    
+
 \end{document}
