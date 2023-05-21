@@ -5,13 +5,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
-\usepackage{epstopdf}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{siunitx}
 \usepackage{parskip}
+\usepackage{textcomp}
 \usepackage{gensymb}
 \usepackage{multicol}
 
@@ -27,7 +27,7 @@
 	\begin{titlepage}
 		\begin{center}
       % Upper margin  
-      \vspace{2cm}
+      \vspace{1.5cm}
       
       % Title -> Large + Bold
       \huge
@@ -41,7 +41,7 @@
       Proyecto Final
       
       % Vertical Space (Tune)
-      \vspace{2cm}
+      \vspace{1cm}
 
       \small
       \textbf{Zaira Lakeisha Rodríguez González} \break
@@ -51,7 +51,7 @@
       \textbf{Diego Alejandro Sánchez Kelly} \break
 
       % Vertical space (Tune)
-      \vspace{1cm}
+      \vspace{0.5cm}
       
       % Institution logo
       \includegraphics[width=0.4\textwidth, keepaspectratio]{./Resources/UDG.png}
@@ -59,6 +59,15 @@
       % Vertical fill sets the lower margin automatically
       \vfill
       
+      \begin{center}
+        \textbf{Abstract} \break
+        Utilizando el sistema de demostración IP02 de la marca Quanser, se diseñó un compensador de adelanto 
+        para el control de la posición de la planta en el demostrador. El diseño se lleva a cabo utilizando 
+        la técnica del lugar geométrico de las raíces, usando MATLAB, Simulink y técnicas manuales. 
+      \end{center}
+
+      \vspace{0.5cm}
+
       % Subject & Institution
       \large
       Ingeniería de Control \break
@@ -70,18 +79,12 @@
 
   % Mandatory pagebreak
 	\pagebreak 
-	
-    \begin{center}
-      \textbf{Abstract} \break
-      Utilizando el sistema de demostración IP01/IP02 de la marca Quanser, se diseñó un controlador de posición 
-      para una planta que consiste en un carro con masa montado en un eje lineal. El diseño del controlador se llevó 
-      por medio del método del luga geométrico de las raíces o LGR. 
-    \end{center}
+
+  \tableofcontents
+  \pagebreak 
 
   % Optional pagebreak  
 	%\pagebreak
-	
-    \tableofcontents
 	
   % Mandatory pagebreak   
 	\pagebreak
@@ -91,6 +94,28 @@
       El diseño del controlador comienza con el modelado matemático de la dinámica del sistema seleccionado. Para 
       facilitar el trabajo, el fabricante se ha encargado de proporcionar un análisis de la dinámica del sistema, 
       a continuación, un resumen del mismo. 
+
+      \subsection{Método del Lugar de las Raíces}
+
+        La intención de este proyecto es la de diseñar un compensador de adelanto por medio del lugar geométrico de las 
+        raíces. 
+
+        En algunos sistemas, el simple hecho de variar la ganancia de un sistema en lazo cerrado será suficiente para 
+        modificar los polos de lazo cerrado a una ubicación diferente y deseada. 
+        
+        En la mayoría de sistemas, sin embargo, esto no es suficiente, por lo que es necesario un análisis más profundo 
+        sobre las raíces del sistema. Esto permite determinar si es necesario añadir polos o ceros en lazo abierto
+        para modificar la respuesta del sistema a una respuesta deseada. 
+
+        \emph{W. R. Evans} diseñó un método conocido como el método de \emph{Root Locus} o
+        \emph{Lugar Geométrico de las Raíces}, en el cual las raíces de la ecuación característica de un sistema
+        se grafican para todos los valores de un parámetro del sistema. 
+
+        Este parámetro es casi siempre una ganancia \( K_{c} \), del sistema, lo cuál permite observar modificaciones 
+        en la ubicación de los polos de lazo cerrado al añadir ceros o polos de lazo abierto. 
+
+        Esto permite encontrar una combinación de ganancia, polos de lazo abierto y ceros de lazo abierto que 
+        modifican la respuesta del sistema a la forma deseada. 
 
       \subsection{Descripción de la Planta}
 
@@ -104,148 +129,252 @@
         por extensión, esto también permite conocer la velocidad y aceleración del mismo. La Figura~\ref{fig:intro:planta}
         muestra el dispositivo, cortesía del fabricante.
 
-        \vfill
-
-        \begin{figure}[h]
+        \begin{figure}
           \centering
-          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP01.png}
+          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP02_Image.png}
           \caption{Planta}
           \label{fig:intro:planta}
         \end{figure}
 
-    \pagebreak
+        Si bien un motor de corriente directa es, por si mismo, un sistema estable, al añadir el resto de 
+        elementos que no necesariamente comparten esta característica, un sistema como este tenderá a ser 
+        inestable.
+
+        \pagebreak
 
 	  \section{Modelado}
 
-      El modelado del dispositivo en su mayoría es realizado por el fabricante en el manual de usuario, por lo que 
-      a continuación se presenta un resumen de los cálculos a partir de los cuales se derivan las funciones de 
-      transferencia de lazo abierto y lazo cerrado. 
-
-      \subsection{Lazo Abierto}  
-
-        \subsubsection{Función de Transferencia}
-
-        El fabricante obtiene 2 modelos matemáticos de la dinámica del sistema, por un lado, un modelo simplificado, 
-        como ejercicio, y posteriormente un modelo más completo, óptimo para el diseño de un controlador. 
+      Para realizar el control de cualquier tipo de planta o sistema, es primero necesario realizar un modelado 
+      matemático del sistema. 
         
-        La función de transferencia de lazo abierto para el modelo complejo es la siguiente, 
+      \subsection{Dinámica del Sistema}
+
+        La parte más relevante del sistema es el motor de corriente directa que se encarga de mover el carrito. 
         
+        Su modelo matemático es bastante simple en principio, un circuito RLC, sin embargo, como se puede observar en la
+        Figura~\ref{fig:modeling:plant_electrical_map}, la salida del motor es una medición angular. 
+
+        Por lo tanto, es necesario primero aplicar un análisis mecánico. Dejemos que \( x\left(t\right) \) sea la 
+        posición del carro, tal que, 
+
         \begin{equation}
-          G\left(s\right) = \frac{r_{mp} \eta_{g} K_{g} \eta_{m} K_{t}}{s^{2}\left(R_{m} M r_{mp}^{2} \eta_{g} K_{g}^{2} J_{m}\right) + 
-          s\left(\eta_{g} K_{g}^{2} \eta_{m} K_{t} K_{m} + B_{eq} R_{m} r_{mp}^{2}\right)}
-          \label{eq:modeling:plantTf}
+          M \left(\dfrac{d^{2}}{dt^{2}}x\left(t\right)\right) + F_{ai}\left(t\right) = 
+          F_{c} \left(t\right) - B_{eq}\left(\dfrac{d}{dt}x \left(t\right)\right)
+          \label{eq:modeling:initial_dynamic}
         \end{equation}
 
-        La sustitución de los parámetros físicos de la planta en la Ecuación~\ref{eq:modeling:plantTf} produce la
-        siguiente función, 
+        donde, \( F_{ai} \) es la inercia experimentada por el carro debido a la rotación del motor y \( F_{c}\) es 
+        la fuerza generada por el motor.
+
+        \begin{figure}[h]
+          \centering
+          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP02_Electrical_Model.png}
+          \caption{Modelo Eléctrico de la Planta}
+          \label{fig:modeling:plant_electrical_map}
+        \end{figure}
+
+        Respectivamente, 
+
+        \begin{equation}
+          F_{c} = \dfrac{\eta_{g} K_{g} T_{m}}{r_{mp}}
+          \label{eq:modeling:motor_generated_force}
+        \end{equation}
+
+        y
         
         \begin{equation}
+          F_{ai} = \dfrac{\eta_{g} K_{g} T_{ai}}{r_{mp}}
+          \label{eq:modeling:armature_inertial_force}
+        \end{equation}
+
+        Desde \ref{eq:modeling:motor_generated_force}, entendemos que es posible modelar el motor 
+        por medio de las leyes de voltaje de Kirchhoff, así, 
+
+        \begin{equation}
+          V_{m} - R_{m} I_{m} - L_{m} \left(\dfrac{\partial}{\partial t} I_{m}\right) - E_{emf} = 0
+          \label{eq:modeling:kirchhoff_kvl}
+        \end{equation}
+
+        Dado que \( L_{m} \ll R_{m} \) podemos simplificar y despejar para obtener, 
+
+        \begin{equation}
+          I_{m} = \dfrac{V_{m} - E_{emf}}{R_{m}}
+          \label{eq:modeling:current_kvl}
+        \end{equation}
+        
+        Entonces, 
+
+        \begin{equation}
+          F_{c} = \dfrac{ \eta_{g} K_{g} \eta_{m} K_{t} \left(V_{m} - K_{m} \omega_{m}\right)}{R_{m} r_{mp}}
+          \label{eq:modeling:motor_force_simp1}
+        \end{equation}
+
+        Considerando que \(\omega_{n}\) es la velocidad angular del motor, podemos reescribir el 
+        parámetro en función de la velocidad lineal del carro, esto es útil a la hora del diseño del controlador. 
+
+        Así, 
+
+        \begin{equation}
+          \omega_{n} = \dfrac{K_{g} \left(\dfrac{d}{dt}x \left(t\right)\right)}{r_{mp}}
+          \label{eq:modeling:angular_velocity_relationship}
+        \end{equation}
+
+        Que finalmente establece que 
+
+        \begin{equation}
+          F_{c} = \dfrac{\eta_{g} K_{g} \eta_{m} K_{t} \left(V_{m} - K_{g} K_{m} \left(\dfrac{d}{dt} x \left(t\right)\right)\right) }{R_{m} {r_{mp}}^{2}}
+          \label{eq:modeling:motor_force_final}
+        \end{equation}
+
+        Por otro lado, desde \ref{eq:modeling:armature_inertial_force}, sabemos que la fuerza aplicada será una función del torque, 
+        por lo tanto, es posible representar \( T_{ai}\) como una función de la posición angular, tal que, 
+
+        \begin{equation}
+          T_{ai} \left(t\right) = J_{m} \left(\dfrac{d^{2}}{dt^{2}} \theta_{m} \left(t\right)\right)
+          \label{eq:modeling:armature_torque_simp1}
+        \end{equation}
+
+        Las propiedades del sistema establecen que, 
+
+        \begin{equation}
+          \theta_{m} = \dfrac{K_{g} x}{r_{mp}}
+          \label{eq:modeling:gearbox_angular_relationship}
+        \end{equation}
+
+        Por lo tanto, sustituyendo, 
+
+        \begin{equation}
+          T_{ai} \left(t\right) = J_{m} \left(\dfrac{d^{2}}{dt^{2}} \dfrac{K_{g} x}{r_{mp}} \left(t\right)\right)
+          \label{eq:modeling:armature_torque_final}
+        \end{equation}
+
+        \begin{equation}
+          F_{ai} = \dfrac{\eta_{g} {K_{g}}^{2}  J_{m} \left(\dfrac{d^{2}}{dt^{2}} \dfrac{K_{g} x}{r_{mp}} \left(t\right)\right)}{{r_{mp}}^{2}}
+          \label{eq:modeling:armature_force_final}
+        \end{equation}
+
+        Finalmente, sustituyendo las ecuaciones \ref{eq:modeling:motor_force_final} y \ref{eq:modeling:armature_force_final}
+        en la Ecuación~\ref{eq:modeling:initial_dynamic} y reorganizando, 
+
+        \begin{multline}
+          \left( M + \dfrac{\eta_{g} {K_{g}}^{2}}{{r_{mp}}^{2}} J_{m} \right) \left( \dfrac{d^{2}}{dt^{2}} x \left(t\right) \right) + \\
+          \left( B_{eq} + \dfrac{\eta_{g} {K_{g}}^{2} \eta_{m} K_{t} K_{m}}{R_{m} {r_{mp}}^{2}} \right) \left(\dfrac{d}{dt} x\left(t\right)\right) = \\
+          \dfrac{\eta_{g} K_{g} \eta_{m} K_{t} K_{m}}{R_{m} r_{mp}}
+          \label{eq:modeling:dynamic_equation}
+        \end{multline}
+
+      \subsection{Función de Transferencia}
+
+        Obtenemos la función de transferencia genérica de lazo abierto de la planta aplicando la transformada de Laplace a 
+        la Ecuación~\ref{eq:modeling:dynamic_equation}. Así, 
+      
+        \begin{equation}
+          G\left(s\right) = \frac{r_{mp} \eta_{g} K_{g} \eta_{m} K_{t}}{s^{2} \left(R_{m} M r_{mp}^{2} \eta_{g} K_{g}^{2} J_{m}\right) + 
+          s\left(\eta_{g} K_{g}^{2} \eta_{m} K_{t} K_{m} + B_{eq} R_{m} r_{mp}^{2}\right)}
+          \label{eq:modeling:plant_generic_tf}
+        \end{equation}
+
+        Para obtener la función de transferencia final, se sustituyen en la Ecuación~\ref{eq:modeling:plant_generic_tf}
+        los parámetros físicos proporcionados por el fabricante, ubicados en la 
+        Figura~\ref{fig:modeling:plant_parameters_01} y la Figura~\ref{fig:modeling:plant_parameters_02}.
+
+        Al sustituír se obtiene, 
+
+        \begin{equation}
           G\left(s\right) = \frac{\expnum{1.8063}{-4}}{s^{2}\left(\expnum{6.8472}{-5}\right) + s\left(\expnum{1.2605}{-3}\right)}
-          \label{eq:modeling:openLoopTf_nosimp}
+          \label{eq:modeling:plant_tf}
         \end{equation}
 
         Esto se puede simplificar posteriormente, tal que,  
         
         \begin{equation}
           G\left(s\right) = \frac{2.638}{s^{2} + s\left(18.409\right)}
-          \label{eq:modeling:openloopTf_simpd}
+          \label{eq:modeling:plant_tf_final}
         \end{equation}
 
         La anterior operación no modifica la ubicación de los polos y ceros del controlador, sin embargo, 
         si permite que los cálculos posteriores sean más sencillos. 
 
-        \subsubsection{Polos y Ceros}
-
-        La retroalimentación negativa no altera las propiedades de los polos y ceros del sistema, asimismo, no 
-        incrementa o reduce su cantidad. Por lo tanto, el análisis de su ubicación se puede realizar antes o después de
-        aplicar retroalimentación negativa. 
-
-        De la función de transferencia de lazo abierto, se obtiene
-
-          \begin{equation*}
-            \begin{aligned}
-              s^{2}+ s\left(18.4092\right) &= 0 \\
-              s^{2} &= -s\left(18.4092\right)\\
-            \end{aligned}
-            \label{eq*:modeling:roots}
-          \end{equation*}    
-
-          de lo anterior, \(s \rightarrow \left\{0, -18.4092\right\}\) en el caso de los polos. 
-
-          Asimismo, observando el numerador de la función original, es evidente que no existen ceros. 
-
-          Es posible verificar la ubicación de los polos y ceros en la Figura~\ref{fig:modeling:pzmap_open}
-
-          \begin{figure}
-            \centering
-            \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/pzmap_ol.png}
-            \caption{Mapa de polos y ceros, Lazo Abierto}
-            \label{fig:modeling:pzmap_open}
-          \end{figure}
-
-      \subsection{Lazo Cerrado}    
-      
-        Se aplica una retroalimentación negativa a la función de transferencia de la Ecuación~\ref{eq:modeling:openloopTf_simpd}.
-
-        Esto se realiza por medio del comando \verb|feedback(tf, 1, -1)|, el cual genera un lazo cerrado con ganancia 
-        unitaria negativa. 
-
-        La función de transferencia de lazo cerrado, entonces,
-
-        \begin{equation}
-          G\left(s\right) = \frac{2.638}{s^{2} + s\left(18.4092\right) + 2.638}
-          \label{eq:model:closedLoopTf}
-        \end{equation}
-
-      \subsubsection{Polos y Ceros}
-        	
-        Por consistencia, comprobamos la locación de los polos y ceros del sistema, que no deben modificarse
-        debido a la retroalimentación aplicada al sistema.
-
-        Por lo tanto, lo establecido en la Sección~\ref{eq*:modeling:roots} debe mantenerse, y, como se puede ver en la 
-        Figura~\ref{fig:modeling:pzmap_closed}, el lugar geométrico de las raíces no se modifica. 
+        \begin{figure}
+          \centering
+          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP02_Parameters_01.png}
+          \caption{Parámetros Físicos de la Planta, 1 de 2. }
+          \label{fig:modeling:plant_parameters_01}
+        \end{figure}
 
         \begin{figure}
           \centering
-          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/pzmap_cl_nc.png}
-          \caption{Mapa de Polos y Ceros, Lazo Cerrado.}
-          \label{fig:modeling:pzmap_closed}
+          \includegraphics[width=0.65\textwidth, keepaspectratio]{./Resources/IP02_Parameters_02.png}
+          \caption{Parámetros Físicos de la Planta, 2 de 2. }
+          \label{fig:modeling:plant_parameters_02}
         \end{figure}
 
-    \pagebreak
-
-    \section{Análisis de Respuesta en el Tiempo}
-
-    Previo a comenzar el diseño del controlador, es necesario conocer la respuesta del sistema a diferentes 
-    estímulos o perturbaciones. Esto es relevante ya que nos permitirá determinar el tipo de controlador 
-    y sus parámetros de diseño. 
-
-    El diseño contempla el uso del lugar geométrico de las raíces para diseñar un compensador de adelanto, por lo 
-    tanto, el análisis de la respuesta se realiza en el dominio del tiempo y no de la frecuencia. 
-
-    Entonces, el primer paso es conocer la respuesta transitoria del sistema, comenzando por la respuesta 
-    a una función escalón. 
-
-    \subsection{Escalón Unitario}
-      
-      Utilizando el comando \verb|step| en MATLAB, es posible obtener la respuesta en el tiempo del sistema 
-      a un estímulo escalón.   
-
-      La Figura~\ref{fig:response:closedLoopStep} muestra la respuesta en lazo cerrado del sistema a un 
-      estímulo constante de amplitud 1. Esta respuesta es característica de un sistema de segundo orden
-
-      Como puede observarse, la respuesta del sistema es lenta. Extrayendo los valores de la misma gráfica, 
-      el tiempo de subida es de \(15.2\si{\second}\), mientras que el tiempo de asentamiento es 
-      de \(27.1\si{\second}\).
+    \subsection{Polos y Ceros de Lazo Abierto}
 
       \begin{figure}
         \centering
-        \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/cltf_step_nc.png}
-        \caption{Respuesta Escalón Unitario, Lazo Cerrado}
-        \label{fig:response:closedLoopStep}
+        \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/IP02_OpenLoop_rlocus.jpg}
+        \caption{Lugar geométrico de las raíces, Lazo Abierto}
+        \label{fig:modeling:open_loop_root_locus}
       \end{figure}
 
+      De la Ecuación~\ref{eq:modeling:plant_tf_final}, se obtiene la ecuación característica del sistema, 
+      así, 
+
+        \begin{equation*}
+          \begin{aligned}
+            s^{2}+ s\left(18.4092\right) &= 0 \\
+            s^{2} &= -s\left(18.4092\right)\\
+          \end{aligned}
+          \label{eq*:modeling:roots}
+        \end{equation*}    
+
+        de lo anterior, \(s \rightarrow \left\{0, -18.4092\right\}\) en el caso de los polos. 
+
+        Observando el numerador de la función original, es evidente que no existen ceros, por lo que no es necesario
+        realizar el cálculo. 
+
+        Sin embargo, utilizando el comando \verb|rlocus| en MATLAB, se puede obtener una gráfica del lugar geométrico
+        de las raíces por medio de la cual podemos verificar los cálculos anteriores. 
+
+        Así, en la Figura~\ref{fig:modeling:open_loop_root_locus}, se comprueba que no existen ceros en la función, 
+        y que ambos polos se encuentran en su ubicación esperada.
+
+    \pagebreak
+
+    \section{Análisis de lazo abierto}
+
+      Previo a comenzar el diseño del controlador, es necesario conocer la respuesta del sistema a diferentes 
+      estímulos o perturbaciones. Esto es relevante ya que nos permitirá determinar el tipo de controlador 
+      y sus parámetros de diseño. 
+
+      Utilizamos el método del lugar geométrico de las raíces, por lo que es necesario realizar el análisis en el 
+      dominio del tiempo. 
+
+      \subsection{Respuesta a Escalón Unitario}
+
+        Utilizando el comando \verb|step| en MATLAB, es posible obtener la respuesta en el tiempo del sistema 
+        a un estímulo escalón.   
+
+        Como se puede observar en la Figura~\ref{fig:response:open_loop_step_response}, la respuesta en lazo abierto 
+        del sistema es característica de un sistema inestable. 
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/IP02_OpenLoop_Step.jpg}
+          \caption{Respuesta Escalón Unitario, Lazo Cerrado}
+          \label{fig:response:open_loop_step_response}
+        \end{figure}
+
+        Se denomina inestable al sistema debido a que un estímulo constante causa que el sistema responda
+        de manera extrema e incontrolable. 
+
+        Por lo tanto, es necesario diseñar un controlador o compensador que permita corregir la respuesta del 
+        sistema. En este caso, la respuesta escalón es de interés ya que se busca controlar velocidad y posición 
+        del carro. 
+
   \pagebreak
+
 
   \section{Diseño del Compensador}
 
@@ -266,8 +395,8 @@
         La teoría de control proporciona una serie de herramientas para moldear la respuesta de un sistema según 
         lo requerido por el diseñador. 
 
-        Para un sistema de segundo orden, (ver Ecuación~\ref{eq:model:closedLoopTf}), la forma normal del sistema 
-        tiene las siguiente ecuación estándar, 
+        Para un sistema de segundo orden, (ver Ecuación~\ref{eq:modeling:plant_tf_final}), la forma normal del sistema 
+        tiene la siguiente ecuación estándar, 
 
         \begin{equation}
           G\left(s\right) = \frac{K_{dc}\omega_{n}^{2}}{s^{2} + 2\zeta\omega_{n}s + \omega_{n}^{2}}
@@ -308,16 +437,16 @@
         Desde \ref{eq:design:overshoot_prcntg}, 
 
         \begin{equation}
-        \zeta = \frac{-\ln\left(P_{osht}\right)}{\sqrt{\pi^{2} + \ln^{2}\left(P_{ovsht}\right)}}
+          \zeta = \frac{-\ln\left(P_{osht}\right)}{\sqrt{\pi^{2} + \ln^{2}\left(P_{ovsht}\right)}}
         \end{equation}
 
-        y, desde, \ref{eq:design:peak_time}, 
+        y, desde \ref{eq:design:peak_time}, 
 
         \begin{equation}
           \omega_{n} = \frac{\pi}{t_{p}\sqrt{1-\zeta^{2}}}
         \end{equation}
         
-        entonces, calculando los valores de $ \zeta $ y de $ \omega_{n} $, obtenemos, 
+        entonces, calculando los valores de \( \zeta \)  y de \( \omega_{n} \), obtenemos, 
 
         \begin{equation*}
           \begin{aligned}
@@ -335,14 +464,14 @@
           \end{aligned}
         \end{equation*}
         
-        Despejando $ S $ en la Ecuación~\ref{eq:design:2ndorder_std_charact}, se obtiene que, 
+        Despejando \( s \) en la Ecuación~\ref{eq:design:2ndorder_std_charact}, se obtiene que, 
 
         \begin{equation}
           s = -\zeta\omega_{n} \pm \omega_{n}\sqrt{1 - \zeta^{2}}j
           \label{eq:design:charact_sval}
         \end{equation}
 
-        y, posteriormente, sustituyendo los valores de $ \zeta $ y de $ \omega_{n} $ calculados anteriormente, 
+        y, posteriormente, sustituyendo los valores de \( \zeta \)  y \( \omega_{n} \) calculados anteriormente, 
         obtenemos,
 
         \begin{equation}
@@ -357,7 +486,7 @@
 
       \subsection{Condición de Ángulo}
 
-        Conociendo la ubiación deseada del polo, el primer paso es entonces verificar si este ya se encuentra en 
+        Conociendo la ubicación deseada del polo, el primer paso es entonces verificar si este ya se encuentra en 
         el lugar geométrico de las raíces, lo cual requiere de aplicar la condición de ángulo. 
 
         La condición de ángulo establece que, 
@@ -369,11 +498,15 @@
 
         Calculando,
         
-        \[ \alpha_{1} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772}\right) \]
+        \begin{equation} 
+          \alpha_{1} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772}\right) 
+        \end{equation}
 
         y 
 
-        \[ \alpha_{2} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772 - 18.40923}\right) \]
+        \begin{equation} 
+          \alpha_{2} = 180\degree - tan^{-1}\left(\dfrac{32.69379}{24.17772 - 18.40923}\right) 
+        \end{equation}
 
         lo cual resulta en \( \alpha_{1} = 126.48367\degree \) y \( \alpha_{2} = 100.00627 \).
 
@@ -385,7 +518,9 @@
 
         entonces, 
 
-        \[ \phi =  180\degree - 126.48367\degree - 100.00627\degree \]
+        \begin{equation} 
+          \phi =  180\degree - 126.48367\degree - 100.00627\degree 
+        \end{equation}
 
         por lo tanto, \( \phi = 46.48994\degree \).
 
@@ -397,105 +532,197 @@
 
         Calulamos la sintonización, 
 
-        \[ \dfrac{\phi}{2} = 23.24497\degree \]
+        \begin{equation} 
+          \dfrac{\phi}{2} = 23.24497\degree 
+        \end{equation}
 
         por lo tanto, 
 
-        \[ \alpha_{3} = \dfrac{\alpha_{1}}{2} = \dfrac{126.48367}{2}  \]
+        \begin{equation} 
+          \alpha_{3} = \dfrac{\alpha_{1}}{2} = \dfrac{126.48367}{2}  
+        \end{equation}
 
         que es, \( \alpha_{3} = 63.2418 \). También, 
 
-        \[ \alpha_{4} = \alpha_{3} - \dfrac{\phi}{2} = 63.2418 - \dfrac{46.4894}{2} \], 
+        \begin{equation} 
+          \alpha_{4} = \alpha_{3} - \dfrac{\phi}{2} = 63.2418 - \dfrac{46.4894}{2} 
+        \end{equation}
         
         que es \( 39.9968 \). 
 
         Entonces, 
 
-        \[ \tan\left(39.9968\right)\dfrac{32.6937}{d} \]
+        \begin{equation} 
+          \tan\left(39.9968\right)\dfrac{32.6937}{d} 
+        \end{equation}
 
         Calculando \( d \), 
 
-        \[ d = \dfrac{32.6937}{\tan\left(39.9968\right)} = 38.9672 \]
+        \begin{equation}
+           d = \dfrac{32.6937}{\tan\left(39.9968\right)} = 38.9672 
+        \end{equation}
 
         A partir de lo anterior, es posible calcular el polo compensado, 
         
-        \[ \dfrac{1}{\alpha } = 38.9672 + 24.1777 = 69.1449 \]
+        \begin{equation} 
+          \dfrac{1}{\alpha } = 38.9672 + 24.1777 = 69.1449 
+        \end{equation}
 
         similarmente, podemos calcular el cero compensado, 
 
-        \[ \tan\left(3.5131 \right) = \dfrac{y}{32.69379} \]
+        \begin{equation} 
+          \tan\left(3.5131 \right) = \dfrac{y}{32.69379} 
+        \end{equation}
 
         despejando, 
 
-        \[ y = 32.6937 \cdot \tan\left(3.5131\right) = 2.0071 \]
+        \begin{equation} 
+          y = 32.6937 \cdot \tan\left(3.5131\right) = 2.0071 
+        \end{equation}
 
         Finalmente, 
 
-        \[ \dfrac{1}{T} = 24.1777 + 2.0071 = 26.1849\]
+        \begin{equation} 
+          \dfrac{1}{T} = 24.1777 + 2.0071 = 26.1849
+        \end{equation}
 
         A partir de esto, es posible proceder con la implementación del controlador y la obtención de la función 
         de transferencia final. 
-
-	\pagebreak
 	
-	\section{Desarrollo del Compensador de Adelanto}
-	
-    La forma estándar de un compensador de adelanto es la siguiente, 
+    \subsection{Compensador}
+    
+      La forma estándar de un compensador de adelanto es la siguiente, 
 
-    \begin{equation}  
-      G_{c}\left(s\right) = K_{c}\dfrac{s+\dfrac{1}{T}}{s + \dfrac{1}{\alpha T}}
-      \label{eq:devel:leadcomp}
-    \end{equation}
-
-    donde \( \alpha \) debe encontrarse en la región \( 0 < \alpha < 1 \). 
-
-    Según lo establecido en la Sección~\ref{subsec:polezero}, sustituímos en la 
-    Ecuación~\ref{eq:devel:leadcomp} para obtener, 
-
-    \[ G_{c}\left(s\right) = K_{c}\dfrac{s + 26.18491}{s + 63.1449}\]
-        
-    \subsection{Ganancia del Compensador}
-
-      Desde, 
-
-      \begin{equation}
-        0 = 1 + G_{c}\left(s\right)G\left(s\right)
-        \label{eq:devel:compdsys_formula}
+      \begin{equation}  
+        G_{c}\left(s\right) = K_{c}\dfrac{s+\dfrac{1}{T}}{s + \dfrac{1}{\alpha T}}
+        \label{eq:devel:leadcomp}
       \end{equation}
 
-      sustituímos, 
+      donde \( \alpha \) debe encontrarse en la región \( 0 < \alpha < 1 \). 
 
-      \[ 1 + K_{c}\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right) = 0 \]
+      Según lo establecido en la Sección~\ref{subsec:polezero}, sustituímos en la 
+      Ecuación~\ref{eq:devel:leadcomp} para obtener, 
 
-      y, posteriormente, evaluamos en \( \hat{s} \), 
+      \begin{equation} 
+        G_{c}\left(s\right) = K_{c}\dfrac{s + 26.18491}{s + 63.1449}
+      \end{equation}
+          
+        \subsubsection{Ganancia del Compensador}
 
-      \[ K_{c}\left|\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right)\right| = 1 \]
+          Desde, 
 
-      tal que, 
+          \begin{equation}
+            0 = 1 + G_{c}\left(s\right)G\left(s\right)
+            \label{eq:devel:compdsys_formula}
+          \end{equation}
 
-      \[ K_{c} = 794.39503 \]
+          sustituímos, 
 
-      Al proceso anterior se le conoce como la \emph{condición de magnitud}. 
+          \begin{equation} 
+            1 + K_{c}\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right) = 0 
+          \end{equation}
 
-    \subsection{Función de Transferencia Compensada} 
+          y, posteriormente, evaluamos en \( \hat{s} \), 
 
-      Finalmente, 
+          \begin{equation} 
+            K_{c}\left|\left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right)\right| = 1 
+          \end{equation}
 
-      \begin{equation*}
-        G_{c}\left(s\right)G_{s}\left(s\right) = 794.39503\frac{2.63891s + 69.0996}{s^{3} + 81.5542s^{2} + 1162.45s}
-      \end{equation*}
+          tal que, 
 
-      Que es el sistema final compensado. 
+          \begin{equation}
+            K_{c} = 794.39503 
+          \end{equation}
+
+          Al proceso anterior se le conoce como la \emph{condición de magnitud}. 
+
+      \subsection{Compensador Finalizado}
+
+        Finalmente, 
+
+        \begin{equation} 
+          G_{c}\left(s\right) = 794.39503\dfrac{s + 26.18491}{s + 63.1449}
+        \end{equation}
+
+      \subsection{Sistema Compensado en Lazo Abierto}
+
+        Finalmente, 
+
+        \begin{equation}
+          G_{c}\left(s\right)G_{s}\left(s\right) =  794.39503 \left(\dfrac{s + 26.1849}{s + 63.1449}\right)\left(\dfrac{2.6389}{s\left(s + 18.4092\right)}\right) 
+          \label{eq:design:OpenLoop_compensated_tf}
+        \end{equation}
+
+        Simplificando, 
+
+        \begin{equation}
+          G_{c}\left(s\right)G_{s}\left(s\right) = 2096.3 \dfrac{s + 26.185}{s \left( s + 18.409 \right) \left(s + 63.145\right)}
+          \label{eq:design:OpenLoop_compensated_tf_final}
+        \end{equation}
 
   \pagebreak
 
-  \section{Análisis del Controlador}
+  \section{Sistema Compensado en Lazo Cerrado}
+      
+    Comenzamos por aplicar retroalimentación negativa a la función de transferencia del sistema compensado. 
 
-    Una vez obtenida la función de transferencia de la planta en serie con el controlador, en serie, es posible determinar 
-    la respuesta del sistema completo y verificar que se ha modificado a la respuesta deseada. 
+    Este proceso se realiza utilizando el comando \verb|feedback(planta, 1, -1)| en MATLAB, que aplica 
+    una retroalimentación con ganancia de \( -1 \) a la planta compensada. 
 
-    Para ello, es de nuestro interés comparar las respuestas a los posibles estímulos al sistema, 
+    El cálculo sigue la fórmula,
 
+    \begin{equation}
+      \dfrac{Y\left(s\right)}{X\left(s\right)} = \dfrac{G_{p}\left(s\right)}{1 + G_{p}\left(s\right) G_{c}\left(s\right)}
+      \label{eq:}
+    \end{equation}
     
+    y resulta en, 
+
+    \begin{equation}
+      G_{p}\left(s\right)G_{c}\left(s\right) = 2096.3 \dfrac{s + 26.185}{s \left( s + 33.21 \right) \left(s^{2} + 48.35 + 1653\right)}
+    \end{equation}
+
+    con polos ubicados en \( s \longrightarrow \left\{-24.1736 \pm 32.6948 j, -33.2071\right\} \),  
+    y ceros ubicados en \( s \longrightarrow \left\{-26.1894\right\} \).
+
+    La ubicación de estos polos y ceros se puede comprobar en la Figura~\ref{fig:compd_system:closed_loop_root_locus}. 
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/IP02_ClosedLoop_rlocus.jpg}
+      \caption{Lugar geométrico de las raíces, Lazo Cerrado}
+      \label{fig:compd_system:closed_loop_root_locus}
+    \end{figure}
+
+    Ya que el controlador se encuentra sintonizado, el uso del lugar geométrico de las raíces probablemente no es 
+    el más adecuado, por lo que la ganancia no se modificaría. 
+
+    Sin embargo, se decidió integrar esta gráfica ya que el movimiento de las raíces permite visualizar más 
+    claramente la nueva ubicación de los polos y ceros de lazo cerrado en el sistema. 
+
+    \subsection{Análisis de lazo cerrado}
+
+      Finalmente, es momento de verificar la funcionalidad del compensador en lazo cerrado, para ello, al igual 
+      que como se hizo en lazo abierto, se aplica un estímulo escalón unitario al sistema. 
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.75\textwidth, keepaspectratio]{./Resources/IP02_ClosedLoop_step.jpg}
+        \caption{Respuesta escalón, Lazo Cerrado}
+        \label{fig:compd_system:closed_loop_step}
+      \end{figure}
+
+    Como se puede observar en la Figura~\ref{fig:compd_system:closed_loop_step}, la respuesta a un estímulo escalón 
+    mejora claramente desde una respuesta totalmente inestable a una respuesta característica de segundo orden con 
+    poco sobredisparo, un corto tiempo de subida y un corto tiempo de asentamiento, de \( 16 \)\% y 
+    \( 30\si{\milli\second} \) y \( 146\si{\milli\second} \) respectivamente.
+
+    Comparando esto con los parámetros definidos originalmente, de \( 110\si{\milli\second} \) para el tiempo de asentamiento
+    y \( 7 \)\% para el porcentaje de sobredisparo, es claro que los parámetros deseados no se cumplen. 
+
+    Considerando posible error humano, así como la naturaleza del diseño de compensadores, no es una sorpresa que la respuesta 
+    no sea precisamente la deseada. 
+
+    Sin embargo, la mejora es sustancial y suficiente para el requerimiento de la aplicación. 
 
 \end{document}
